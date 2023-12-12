@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package Reddit;
+
+service RedditService {
+    rpc CreatePost(Post) returns (Post) {}
+    rpc UpvotePost(PostRequest) returns (Post) {}
+    rpc DownvotePost(PostRequest) returns (Post) {}
+    rpc GetPostContent(PostRequest) returns (Post) {}
+    rpc CreateComment(Comment) returns (Comment) {}
+    rpc UpvoteComment(CommentRequest) returns (Comment) {}
+    rpc DownvoteComment(CommentRequest) returns (Comment) {}
+    rpc GetNMostComment(GetNMostRequest) returns (GetNMostResponse) {}
+    rpc ExpandCommentBranch(ExpandCommentRequest) returns (ExpandCommentResponse) {}
+    rpc MonitorUpdate(stream MonitorUpdateRequest) returns (stream MonitorUpdateResponse) {}
+}
+
+
+message User {
+    string user_ID = 1;
+}
+
+message Post {
+    string title = 1;
+    string text = 2;
+    oneof media_url {
+       string video_url = 3;
+       string image_url = 4; 
+    }
+    string author = 5;
+    int32 score = 6;
+    enum PostState {
+        NORMAL = 0;
+        HIDDEN = 1;
+        LOCKED = 2;
+    }
+    PostState status = 7;
+    string pub_date = 8;
+    string post_id = 9;
+    string parent_subreddit_id = 10;
+}
+
+message Comment {
+    string parent_id = 1;
+    string author = 2;
+    string text = 3;
+    int32 score = 4;
+    enum CommentState {
+        NORMAL = 0;
+        HIDDEN = 1;
+    }
+    CommentState status = 5;
+    string pub_date = 6;
+    string comment_id = 7;
+}
+
+message Subreddit {
+    string subreddit_id = 1;
+    string name = 2;
+    enum SubredditState {
+        PUBLIC = 0;
+        PRIVATE = 1;
+        HIDDEN = 2;
+    }
+    SubredditState status = 3;
+    repeated string tags = 4;
+}
+
+message PostRequest {
+    string post_id = 1;
+}
+
+message CommentRequest {
+    string comment_id = 1;
+}
+
+message GetNMostRequest {
+    string post_id = 1;
+    int32 N = 2;
+}
+
+message GetNMostResponse {
+    repeated Comment most_comment = 1;
+}
+
+message ExpandCommentRequest {
+    string comment_id = 1;
+    int32 N = 2;
+}
+
+message ExpandCommentResponse {
+    Comment root_comment = 1;
+    repeated Comment expanded_comments = 2;
+}
+
+message MonitorUpdateRequest {
+    string post_id = 1;
+    repeated string comment_id = 2;
+}
+
+message CommentWithScore {
+    string comment_id = 1;
+    int32 comment_score = 2;
+}
+
+message MonitorUpdateResponse {
+    int32 post_score = 1;
+    repeated CommentWithScore comment_score = 2;
+}
